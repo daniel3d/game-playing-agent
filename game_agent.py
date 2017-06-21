@@ -162,15 +162,15 @@ class MinimaxPlayer(IsolationPlayer):
         try:
             # The try/except block will automatically catch the exception
             # raised when the timer is about to expire.
-            return self.minimax(game, self.search_depth)
-
+            best_move = self.minimax(game, self.search_depth)
+            
         except SearchTimeout:
-            pass  # Handle any actions required after timeout as needed
+            pass # Handle any actions required after timeout as needed
 
         # Return the best move from the last completed search iteration
         return best_move
 
-    def minimax(self, game, depth):
+    def minimax(self, game, depth, recursive=False, maximizing=True):
         """Implement depth-limited minimax search algorithm as described in
         the lectures.
 
@@ -192,11 +192,21 @@ class MinimaxPlayer(IsolationPlayer):
             Depth is an integer representing the maximum number of plies to
             search in the game tree before aborting
 
+        recursive : bool
+            Allow us to use the same function and at the same time pass the 
+            udacity test suite, if True the function will return score and move
+
+        maximizing : bool
+            Determinante if we are maximizing the player
+
         Returns
         -------
         (int, int)
             The board coordinates of the best move found in the current search;
             (-1, -1) if there are no legal moves
+
+        [float, (int, int)]
+            When called with flag recursive
 
         Notes
         -----
@@ -212,9 +222,31 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        # Algorithm for the depth limited minimax from
+        # https://en.wikipedia.org/wiki/Minimax
 
+        legal_moves = game.get_legal_moves()
+
+        if depth == 0 or not legal_moves:
+            return game.utility(self), (-1, -1)
+
+        if maximizing:
+            best_score = float('-inf')
+            for legal_move in legal_moves:
+               score, move = self.minimax(game.forecast_move(legal_move), depth - 1, True, False) 
+               if score > best_score:
+                    best_score, best_move = score, move
+        else:
+            best_score = float('inf')
+            for legal_move in legal_moves:
+                score, move = self.minimax(game.forecast_move(legal_move), depth - 1, True, True)
+                if score < best_score:
+                    best_score, best_move = score, move
+
+        if recursive:
+            return best_score, best_move
+        else:
+            return best_move
 
 class AlphaBetaPlayer(IsolationPlayer):
     """Game-playing agent that chooses a move using iterative deepening minimax
@@ -254,10 +286,25 @@ class AlphaBetaPlayer(IsolationPlayer):
         """
         self.time_left = time_left
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        # Initialize the best move so that this function returns something
+        # in case the search fails due to timeout
+        best_move = (-1, -1)
 
-    def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
+
+        while True:
+            try:
+                # The try/except block will automatically catch the exception
+                # raised when the timer is about to expire.
+                best_move = self.alphabeta(game, self.search_depth)
+                self.search_depth += 1
+
+            except SearchTimeout:
+                break # Handle any actions required after timeout as needed
+
+        # Return the best move from the last completed search iteration
+        return best_move
+
+    def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), recursive=False, maximizing=True):
         """Implement depth-limited minimax search with alpha-beta pruning as
         described in the lectures.
 
@@ -285,11 +332,21 @@ class AlphaBetaPlayer(IsolationPlayer):
         beta : float
             Beta limits the upper bound of search on maximizing layers
 
+        recursive : bool
+            Allow us to use the same function and at the same time pass the 
+            udacity test suite, if True the function will return score and move
+
+        maximizing : bool
+            Determinante if we are maximizing the player
+
         Returns
         -------
         (int, int)
             The board coordinates of the best move found in the current search;
             (-1, -1) if there are no legal moves
+        
+        [float, (int, int)]
+            When called with flag recursive
 
         Notes
         -----
@@ -305,5 +362,34 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        # Algorithm for the alpha-beta pruning from
+        # https://en.wikipedia.org/wiki/Alpha-beta_pruning
+
+        legal_moves = game.get_legal_moves()
+
+        if depth == 0 or not legal_moves:
+            return game.utility(self), (-1, -1)
+
+        if maximizing:
+            best_score = float('-inf')
+            for legal_move in legal_moves:
+                score, move = self.alphabeta(game.forecast_move(legal_move), depth - 1, alpha, beta, True, False) 
+                if score > best_score:
+                    best_score, best_move = score, move
+                if best_score >= beta:
+                    break
+                alpha = max(alpha, best_score)
+        else:
+            best_score = float('inf')
+            for legal_move in legal_moves:
+                score, move = self.alphabeta(game.forecast_move(legal_move), depth - 1, alpha, beta, True, True)
+                if score < best_score:
+                    best_score, best_move = score, move
+                if best_score <= alpha:
+                    break
+                beta = min(beta, best_score)
+
+        if recursive:
+            return best_score, best_move
+        else:
+            return best_move
