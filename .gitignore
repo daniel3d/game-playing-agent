@@ -1,3 +1,4 @@
 .udacity-pa
 *.pyc
 *.zip
+*.json

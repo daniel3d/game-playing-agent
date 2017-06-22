@@ -222,7 +222,7 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # Algorithm for the depth limited minimax from
+        # Algorithm for the depth limited minimax
         # https://en.wikipedia.org/wiki/Minimax
 
         legal_moves = game.get_legal_moves()
@@ -362,7 +362,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # Algorithm for the alpha-beta pruning from
+        # Algorithm for the alpha-beta pruning
         # https://en.wikipedia.org/wiki/Alpha-beta_pruning
 
         legal_moves = game.get_legal_moves()
