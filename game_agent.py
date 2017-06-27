@@ -42,7 +42,7 @@ def custom_score(game, player, level=2.):
 
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(own_moves - moves_opp * level)
+    return float(own_moves - opp_moves * level)
 
 def custom_score_2(game, player):
     """Calculate the heuristic value of a game state from the point of view
