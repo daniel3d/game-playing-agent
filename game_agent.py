@@ -10,7 +10,7 @@ class SearchTimeout(Exception):
     pass
 
 
-def custom_score(game, player):
+def custom_score(game, player, level=2.):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
 
@@ -42,7 +42,7 @@ def custom_score(game, player):
 
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(own_moves - (2 * opp_moves))
+    return float(own_moves - moves_opp * level)
 
 def custom_score_2(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -72,14 +72,12 @@ def custom_score_2(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    moves_own = len(game.get_legal_moves(player))
-    moves_opp = len(game.get_legal_moves(game.get_opponent(player)))
     board = game.height * game.width
     moves_board = game.move_count / board
     if moves_board > 0.33:
-        move_diff = (moves_own - moves_opp*2) 
+        move_diff = custom_score(game, player, 2.)
     else:
-        move_diff = (moves_own - moves_opp)
+        move_diff = custom_score(game, player, 1.)
 
     pos_own = game.get_player_location(player)
     pos_opp = game.get_player_location(game.get_opponent(player))
